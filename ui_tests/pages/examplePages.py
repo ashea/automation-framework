@@ -4,8 +4,9 @@ from .base import ApplicationBasePage
 
 
 class GooglePage(ApplicationBasePage):
-    _search_box = (By.CSS_SELECTOR, "#sb_ifc0")
-    _search_button = (By.CSS_SELECTOR, ".lsb")
+    _search_box = (By.XPATH, ".//div[@id='searchform']/descendant::input"
+                             "[@aria-label='Buscar']")
+    _search_button = (By.XPATH, ".//button[@type='submit']")
 
     def search(self, search_word):
         self.driver_facade.send_keys(self._search_box, search_word)
