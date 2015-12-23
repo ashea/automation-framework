@@ -1,4 +1,3 @@
-import time
 from behave import given, when, then
 from ui_tests.pages.base import PageObjectFactory
 from ui_tests.pages.examplePages import GooglePage
