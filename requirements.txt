@@ -1,3 +1,5 @@
 behave
 selenium == 2.48.0
 PyHamcrest == 1.8.5
+PollyReports
+ReportLab

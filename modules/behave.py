@@ -7,9 +7,12 @@ from .config import ApplicationUtils
 from ui_tests.pages.base import PageObjectFactory
 from .driver import WebDriverFacade
 from json import dumps
+from reports import generate_report
 
 
 logger = logging.getLogger(__file__)
+
+results = []
 
 
 class ContextSubject(object):
@@ -47,6 +50,7 @@ def after_feature(context, feature):
 
     context.feature_name = match.group()
     context.context_subject.notify("after_feature")
+    build_report(feature.filename)
 
 
 def after_scenario(context, scenario):
@@ -85,6 +89,9 @@ def after_scenario(context, scenario):
                 shutil.move(os.path.join(source_fld, f), os.path.join(
                     source_fld, destination_fld, f))
 
+    test_data = {'name': scenario.name, 'status': scenario.status}
+    results.append(test_data)
+
     context.driver.quit()
     context.context_subject.notify("after_scenario")
 
@@ -99,6 +106,10 @@ def before_scenario(context, scenario):
     page_factory = PageObjectFactory()
     page_factory.driver = context.driver
     page_factory.base_url = context.base_url
+
+
+def build_report(feature_name):
+    generate_report(feature_name, results)
 
 
 def context_initializer(context, browser_size=None, user_agent=None):
