@@ -34,7 +34,8 @@ def _create_chrome_driver(proxy_url):
     return webdriver.Chrome(chrome_options=chrome_options)
 
 
-def create_new_driver(browser_name, proxy_url, timeout, browser_size, user_agent):
+def create_new_driver(browser_name, proxy_url, timeout, browser_size,
+                      user_agent):
     """Main method to create the selenium driver"""
     global global_timeout
     global_timeout = timeout

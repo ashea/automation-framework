@@ -19,3 +19,8 @@ def step(context, search_word):
 @then('I should see that the search is performed correctly')
 def step(context):
     assert_that(context.page.is_search_correct(context.word))
+
+
+@then('I should see that the search is performed wrongly')
+def step(context):
+    assert_that(not(context.page.is_search_correct(context.word)))
