@@ -26,12 +26,11 @@ def _create_firefox_driver(proxy_url, user_agent):
 
 
 def _create_chrome_driver(proxy_url):
-    chrome_options = None
-    if proxy_url:
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument('--proxy-server=%s' % proxy_url)
+    chrome_options = webdriver.ChromeOptions()
 
-    return webdriver.Chrome(chrome_options=chrome_options)
+    if proxy_url:
+        chrome_options.add_argument('--proxy-server=%s' % proxy_url)
+    return webdriver.Chrome(options=chrome_options)
 
 
 def create_new_driver(browser_name, proxy_url, timeout, browser_size,
@@ -46,13 +45,14 @@ def create_new_driver(browser_name, proxy_url, timeout, browser_size,
         driver = _create_chrome_driver(proxy_url)
     else:
         raise ValueError("The driver couldn't be created")
-    driver.maximize_window()
     if browser_size == 'small':
         driver.set_window_size(400, 600)
     elif browser_size == 'medium':
         driver.set_window_size(768, 1024)
     elif browser_size == 'large':
         driver.set_window_size(1280, 1024)
+    else:
+        driver.maximize_window()
 
     driver.implicitly_wait(timeout)
 

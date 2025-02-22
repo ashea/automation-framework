@@ -7,7 +7,6 @@ from .config import ApplicationUtils
 from ui_tests.pages.base import PageObjectFactory
 from .driver import WebDriverFacade
 from json import dumps
-from reports import generate_report
 
 
 logger = logging.getLogger(__file__)
@@ -54,13 +53,13 @@ def after_feature(context, feature):
 
 
 def after_scenario(context, scenario):
-    if "failed" == scenario.status:
+    if "failed" == str(scenario.status):
         take_screenshot(context, scenario, scenario.status)
         data = dumps({'passed': False})
         try:
             os.mkdir(os.path.join(context.utils.get_screenshot_directory(),
-                                  scenario.status))
-        except OSError, e:
+                                  str(scenario.status)))
+        except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
         source_fld = context.utils.get_screenshot_directory()
@@ -71,17 +70,17 @@ def after_scenario(context, scenario):
             if "FAILED" in f:
                 shutil.move(os.path.join(source_fld, f), os.path.join(
                     source_fld, destination_fld, f))
-    elif "passed" == scenario.status:
+    elif "passed" == str(scenario.status):
         take_screenshot(context, scenario, scenario.status)
         data = dumps({'passed': True})
         try:
             os.mkdir(os.path.join(context.utils.get_screenshot_directory(),
-                                  scenario.status))
-        except OSError, e:
+                                  str(scenario.status)))
+        except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
         source_fld = context.utils.get_screenshot_directory()
-        destination_fld = scenario.status
+        destination_fld = str(scenario.status)
         file_names = WebDriverFacade(context.driver).list_files_with_extension(
             source_fld, ".png")
         for f in file_names:
@@ -89,7 +88,7 @@ def after_scenario(context, scenario):
                 shutil.move(os.path.join(source_fld, f), os.path.join(
                     source_fld, destination_fld, f))
 
-    test_data = {'name': scenario.name, 'status': scenario.status}
+    test_data = {'name': scenario.name, 'status': str(scenario.status)}
     results.append(test_data)
 
     context.driver.quit()
@@ -109,7 +108,8 @@ def before_scenario(context, scenario):
 
 
 def build_report(feature_name):
-    generate_report(feature_name, results)
+    # generate_report(feature_name, results)
+    pass
 
 
 def context_initializer(context, browser_size=None, user_agent=None):
@@ -125,7 +125,7 @@ def context_initializer(context, browser_size=None, user_agent=None):
 def take_screenshot(context, scenario, status):
     new_scenario_name = scenario.name[0:9]
     new_scenario_name = re.sub(r'[\W_]+', '_',
-                               status.upper() + '_' + new_scenario_name)
+                               str(status).upper() + '_' + new_scenario_name)
     png_file_name = new_scenario_name + ".png"
     ss_file = os.path.join(context.utils.get_screenshot_directory(),
                            png_file_name)

@@ -1,4 +1,4 @@
-import ConfigParser
+import configparser
 import os
 from .resources import ResourcesManager
 from .driver import create_new_driver
@@ -42,7 +42,7 @@ class ApplicationUtils(object):
 
 class ConfigurationParser(object):
     def __init__(self):
-        self._config_parser = ConfigParser.ConfigParser()
+        self._config_parser = configparser.ConfigParser()
         url = self._get_config_file_url('setup.cfg')
         self._config_parser.readfp(open(url))
 

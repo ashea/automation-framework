@@ -1,18 +1,23 @@
-import time
 from selenium.webdriver.common.by import By
 from .base import ApplicationBasePage
 
 
-class GooglePage(ApplicationBasePage):
-    _search_box = (By.XPATH, ".//div[@id='searchform']/descendant::input"
-                             "[@aria-label='Buscar']")
-    _search_button = (By.XPATH, ".//button[@type='submit']")
+class LoginPage(ApplicationBasePage):
+    email_input = (By.XPATH, ".//div[@class='login-form']//input[@type='email']")
+    password_input = (By.XPATH, ".//div[@class='login-form']//input[@type='password']")
+    search_button = (By.XPATH, ".//button[text()='Login']")
+    incorrect_credentials_error = (By.XPATH,
+                                   ".//div[@class='login-form']//p[text()='Your email or password is incorrect!']")
+    login_success_message = (By.XPATH,
+                             ".//div[@class='login-form']//p[text()='Login Success!']")
 
-    def search(self, search_word):
-        self.driver_facade.send_keys(self._search_box, search_word)
-        self.driver_facade.click(self._search_button)
+    def input_credentials(self, email, password):
+        self.driver_facade.send_keys(self.email_input, email)
+        self.driver_facade.send_keys(self.password_input, password)
+        self.driver_facade.click(self.search_button)
 
-    def is_search_correct(self, word):
-        title = word + ' - Buscar con Google'
-        time.sleep(2)
-        return title == self.page_title()
+    def is_login_success(self):
+        return self.driver_facade._get_element(self.login_success_message)
+
+    def is_login_error_displayed(self):
+        return self.driver_facade._get_element(self.incorrect_credentials_error)

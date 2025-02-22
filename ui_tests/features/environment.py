@@ -2,7 +2,7 @@ from modules import behave
 
 
 def before_all(context):
-    behave.context_initializer(context, browser_size="large")
+    behave.context_initializer(context, browser_size="max")
 
 
 def after_feature(context, feature):
