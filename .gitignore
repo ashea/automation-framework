@@ -65,3 +65,5 @@ target/
 
 #Reports
 *.pdf
+
+allure-results/

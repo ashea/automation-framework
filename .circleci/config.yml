@@ -1,0 +1,81 @@
+version: 2.1
+
+commands:
+  setup_environment:
+    description: Install all required dependencies
+    steps:
+      - run:
+          name: Install system dependencies
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y wget gnupg unzip jq
+      - run:
+          name: Install Google Chrome
+          command: |
+            wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+            echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+            sudo apt-get update
+            sudo apt-get install -y google-chrome-stable
+      - run:
+          name: Install Python dependencies
+          command: |
+            pip install --upgrade pip
+            pip install behave selenium allure-behave chromedriver-autoinstaller
+      - run:
+          name: Install Allure CLI
+          command: |
+            curl -o allure.zip -L https://github.com/allure-framework/allure2/releases/download/2.24.1/allure-2.24.1.zip
+            unzip allure.zip -d /home/circleci/
+            echo 'export PATH=$PATH:/home/circleci/allure-2.24.1/bin' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: Install Java
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y openjdk-11-jdk
+            echo 'export JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"' >> $BASH_ENV
+            echo 'export PATH=$JAVA_HOME/bin:$PATH' >> $BASH_ENV
+
+jobs:
+  run_tests:
+    docker:
+      - image: cimg/python:3.9
+    resource_class: large
+    steps:
+      - checkout
+      - setup_environment
+      - run:
+          name: Ensure Allure output directory exists
+          command: mkdir -p /home/circleci/project/tmp/my_allure_results
+      - run:
+          name: Run automated tests with Behave
+          command: |
+            behave -f allure_behave.formatter:AllureFormatter -o /home/circleci/project/tmp/my_allure_results ui_tests/features/ || true
+      - persist_to_workspace:
+          root: /home/circleci/project/tmp
+          paths:
+            - my_allure_results
+
+  generate_report:
+    docker:
+      - image: cimg/python:3.9
+    resource_class: large
+    steps:
+      - checkout
+      - setup_environment
+      - attach_workspace:
+          at: /home/circleci/project/tmp
+      - run:
+          name: Generate Allure Report
+          command: |
+            allure generate -o /home/circleci/project/tmp/my_allure_results/report /home/circleci/project/tmp/my_allure_results
+      - store_artifacts:
+          path: /home/circleci/project/tmp/my_allure_results/report
+
+workflows:
+  build_and_report:
+    jobs:
+      - run_tests
+      - generate_report:
+          requires:
+            - run_tests

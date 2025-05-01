@@ -3,6 +3,9 @@ import errno
 import re
 import os
 import shutil
+
+import allure
+
 from .config import ApplicationUtils
 from ui_tests.pages.base import PageObjectFactory
 from .driver import WebDriverFacade
@@ -53,41 +56,9 @@ def after_feature(context, feature):
 
 
 def after_scenario(context, scenario):
-    if "failed" == str(scenario.status):
-        take_screenshot(context, scenario, scenario.status)
-        data = dumps({'passed': False})
-        try:
-            os.mkdir(os.path.join(context.utils.get_screenshot_directory(),
-                                  str(scenario.status)))
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
-        source_fld = context.utils.get_screenshot_directory()
-        destination_fld = scenario.status
-        file_names = WebDriverFacade(context.driver).\
-            list_files_with_extension(source_fld, ".png")
-        for f in file_names:
-            if "FAILED" in f:
-                shutil.move(os.path.join(source_fld, f), os.path.join(
-                    source_fld, destination_fld, f))
-    elif "passed" == str(scenario.status):
-        take_screenshot(context, scenario, scenario.status)
-        data = dumps({'passed': True})
-        try:
-            os.mkdir(os.path.join(context.utils.get_screenshot_directory(),
-                                  str(scenario.status)))
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
-        source_fld = context.utils.get_screenshot_directory()
-        destination_fld = str(scenario.status)
-        file_names = WebDriverFacade(context.driver).list_files_with_extension(
-            source_fld, ".png")
-        for f in file_names:
-            if "PASSED" in f:
-                shutil.move(os.path.join(source_fld, f), os.path.join(
-                    source_fld, destination_fld, f))
-
+    if scenario.status == 'failed':
+        screenshot = context.driver.get_screenshot_as_png()
+        allure.attach(screenshot, name=scenario.name, attachment_type=allure.attachment_type.PNG)
     test_data = {'name': scenario.name, 'status': str(scenario.status)}
     results.append(test_data)
 
